@@ -59,12 +59,10 @@ async def mystats(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def topreferrers(update: Update, context: ContextTypes.DEFAULT_TYPE):
     data = load_data()
     top = sorted(data.items(), key=lambda x: len(x[1]), reverse=True)[:5]
-    msg = "🏆 Топ пригласивших:
-"
+    msg = "🏆 Топ пригласивших:"
     for uid, refs in top:
         user = await context.bot.get_chat(uid)
-        msg += f"- {user.first_name}: {len(refs)} чел.
-"
+        msg += f"- {user.first_name}: {len(refs)} чел."
     await update.message.reply_text(msg)
 
 # Авторассылка
