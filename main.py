@@ -45,8 +45,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = str(update.effective_user.id)
     link = f"https://t.me/{context.bot.username}?start={user_id}"
     await update.message.reply_text(
-        f"🤝 Вот твоя реферальная ссылка:
-{link}"
+        f"🤝 Вот твоя реферальная ссылка:{link}"
     )
 
 # /mystats — количество приглашённых
