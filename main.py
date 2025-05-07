@@ -76,7 +76,6 @@ async def role_selected(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def funnel_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     msg = update.message.text.strip()
-    await update.message.delete()
     state = user_states.get(user_id, {})
 
     if state.get("step") == "last_name":
@@ -96,9 +95,13 @@ async def funnel_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         data = user_states[user_id]
         msg_admin = (
             f"📥 Новый контакт с воронки:"
+
             f"Роль: {data['role']}"
+
             f"Фамилия: {data['last_name']}"
+
             f"Имя: {data['first_name']}"
+
             f"Телефон/контакт: {data['phone']}"
         )
         await context.bot.send_message(chat_id=ADMIN_ID, text=msg_admin)
