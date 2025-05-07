@@ -76,6 +76,8 @@ async def role_selected(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def funnel_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     msg = update.message.text.strip()
+    msg_id = update.message.message_id
+    chat_id = update.effective_chat.id
     state = user_states.get(user_id, {})
     state = user_states.get(user_id, {})
 
@@ -88,9 +90,9 @@ async def funnel_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Введите ваше имя:", **args)
     if state.get("step"):
         try:
-            await update.message.delete()
+            await context.bot.delete_message(chat_id=chat_id, message_id=msg_id)
         except Exception as e:
-            print(f"[!] Не удалось удалить сообщение пользователя воронки: {e}")
+            print(f"[!] Не удалось удалить сообщение пользователя (имя): {e}")
     elif state.get("step") == "first_name":
         user_states[user_id]["first_name"] = msg
         user_states[user_id]["step"] = "phone"
@@ -100,9 +102,9 @@ async def funnel_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Введите ваш номер телефона или Telegram @юзернейм:", **args)
     if state.get("step"):
         try:
-            await update.message.delete()
+            await context.bot.delete_message(chat_id=chat_id, message_id=msg_id)
         except Exception as e:
-            print(f"[!] Не удалось удалить сообщение пользователя воронки: {e}")
+            print(f"[!] Не удалось удалить сообщение пользователя (контакт): {e}")
     elif state.get("step") == "phone":
         user_states[user_id]["phone"] = msg
         users = load_users()
