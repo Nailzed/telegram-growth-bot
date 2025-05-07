@@ -76,30 +76,16 @@ async def role_selected(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def funnel_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     msg = update.message.text.strip()
-    msg_id = update.message.message_id
-    chat_id = update.effective_chat.id
-    state = user_states.get(user_id, {})
-    if state.get("step"):
-        try:
-            await context.bot.delete_message(chat_id=chat_id, message_id=msg_id)
-        except Exception as e:
-            print(f"[!] Не удалось удалить сообщение пользователя ДО ответа: {e}")
     state = user_states.get(user_id, {})
 
     if state.get("step") == "last_name":
         user_states[user_id]["last_name"] = msg
         user_states[user_id]["step"] = "first_name"
-        args = {}
-        if update.message.message_thread_id:
-            args["message_thread_id"] = update.message.message_thread_id
-        await update.message.reply_text("Введите ваше имя:", **args)
+        await update.message.reply_text("Введите ваше имя:")
     elif state.get("step") == "first_name":
         user_states[user_id]["first_name"] = msg
         user_states[user_id]["step"] = "phone"
-        args = {}
-        if update.message.message_thread_id:
-            args["message_thread_id"] = update.message.message_thread_id
-        await update.message.reply_text("Введите ваш номер телефона или Telegram @юзернейм:", **args)
+        await update.message.reply_text("Введите ваш номер телефона или Telegram @юзернейм:")
     elif state.get("step") == "phone":
         user_states[user_id]["phone"] = msg
         users = load_users()
