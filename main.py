@@ -1,3 +1,4 @@
+
 import os
 import asyncio
 import json
@@ -10,7 +11,7 @@ from telegram.ext import (
 
 TOKEN = os.getenv("BOT_TOKEN")
 REFERRAL_FILE = "referrals.json"
-PROMO_INTERVAL = 21600  # авторассылка раз в 6 часов
+PROMO_INTERVAL = 21600
 GROUP_ID = int(os.getenv("GROUP_ID"))
 USER_DB = "users.json"
 ADMIN_ID = 124522501
@@ -48,8 +49,10 @@ async def welcome(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 data[ref_by].append(str(member.id))
                 save_data(data)
         await update.message.reply_text(
-            f"👋 Добро пожаловать, {member.full_name}! "
-            "Пригласи друзей, чтобы попасть в топ 📈"
+            f"👋 Добро пожаловать, {member.full_name}!"
+            f"Пригласи друзей, чтобы попасть в топ 📈"
+            f"🚀 Чтобы пройти регистрацию — напишите боту в личные сообщения:"
+            f"👉 https://t.me/{context.bot.username}"
         )
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -87,10 +90,10 @@ async def funnel_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         data = user_states[user_id]
         msg_admin = (
-            f"📥 Новый контакт с воронки:"
-            f"Роль: {data['role']}"
-            f"Фамилия: {data['last_name']}"
-            f"Имя: {data['first_name']}"
+            f"📥 Новый контакт с воронки:\n\n"
+            f"Роль: {data['role']}\n"
+            f"Фамилия: {data['last_name']}\n"
+            f"Имя: {data['first_name']}\n"
             f"Телефон/контакт: {data['phone']}"
         )
         await context.bot.send_message(chat_id=ADMIN_ID, text=msg_admin)
@@ -106,11 +109,11 @@ async def mystats(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def topreferrers(update: Update, context: ContextTypes.DEFAULT_TYPE):
     data = load_data()
     top = sorted(data.items(), key=lambda x: len(x[1]), reverse=True)[:5]
-    msg = "🏆 Топ пригласивших:"
+    msg = "🏆 Топ пригласивших:\n"
     for uid, refs in top:
         try:
             user = await context.bot.get_chat(uid)
-            msg += f"- {user.first_name}: {len(refs)} чел."
+            msg += f"- {user.first_name}: {len(refs)} чел.\n"
         except:
             pass
     await update.message.reply_text(msg)
