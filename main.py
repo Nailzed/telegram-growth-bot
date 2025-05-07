@@ -10,7 +10,7 @@ from telegram.ext import (
 
 TOKEN = os.getenv("BOT_TOKEN")
 REFERRAL_FILE = "referrals.json"
-PROMO_INTERVAL = 3600  # авторассылка раз в час
+PROMO_INTERVAL = 21600  # авторассылка раз в 6 часов
 GROUP_ID = int(os.getenv("GROUP_ID"))
 
 def load_data():
@@ -104,3 +104,68 @@ if __name__ == "__main__":
     ), PROMO_INTERVAL)
 
     app.run_polling()
+
+
+
+from telegram import ReplyKeyboardMarkup
+
+USER_DB = "users.json"
+ADMIN_ID = 124522501
+user_states = {}
+
+def load_users():
+    if os.path.exists(USER_DB):
+        with open(USER_DB, "r") as f:
+            return json.load(f)
+    return {}
+
+def save_users(data):
+    with open(USER_DB, "w") as f:
+        json.dump(data, f)
+
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    keyboard = [["👶 Новичок", "🚛 Овнер"], ["🧠 Диспетчер", "💰 Инвестор"]]
+    reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True)
+    await update.message.reply_text("Привет! Пожалуйста, выбери кто ты:", reply_markup=reply_markup)
+    user_states[update.effective_user.id] = {"step": "role"}
+
+async def funnel_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    msg = update.message.text.strip()
+    state = user_states.get(user_id, {})
+
+    if state.get("step") == "role" and msg in ["👶 Новичок", "🚛 Овнер", "🧠 Диспетчер", "💰 Инвестор"]:
+        user_states[user_id]["role"] = msg
+        user_states[user_id]["step"] = "last_name"
+        await update.message.reply_text("Введите вашу фамилию:")
+    elif state.get("step") == "last_name":
+        user_states[user_id]["last_name"] = msg
+        user_states[user_id]["step"] = "first_name"
+        await update.message.reply_text("Введите ваше имя:")
+    elif state.get("step") == "first_name":
+        user_states[user_id]["first_name"] = msg
+        user_states[user_id]["step"] = "phone"
+        await update.message.reply_text("Введите ваш номер телефона или Telegram @юзернейм:")
+    elif state.get("step") == "phone":
+        user_states[user_id]["phone"] = msg
+        # Сохраняем
+        users = load_users()
+        users[str(user_id)] = user_states[user_id]
+        save_users(users)
+
+        # Отправка админу
+        data = user_states[user_id]
+        msg_admin = (
+            f"📥 Новый контакт с воронки:\n\n"
+            f"Роль: {data['role']}\n"
+            f"Фамилия: {data['last_name']}\n"
+            f"Имя: {data['first_name']}\n"
+            f"Телефон/контакт: {data['phone']}"
+        )
+        await context.bot.send_message(chat_id=ADMIN_ID, text=msg_admin)
+        await update.message.reply_text("Спасибо! Ваша информация отправлена.")
+        del user_states[user_id]
+
+
+app.add_handler(CommandHandler("start", start))
+app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), funnel_handler))
