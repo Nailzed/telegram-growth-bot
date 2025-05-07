@@ -76,7 +76,11 @@ async def role_selected(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def funnel_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     msg = update.message.text.strip()
-    await update.message.delete()
+    try:
+        await update.message.delete()
+    except Exception as e:
+        print(f'[!] Ошибка удаления user-сообщения: {e}')
+    user_states[user_id]['last_user_msg_id'] = update.message.message_id
     state = user_states.get(user_id, {})
 
     if state.get("step") == "last_name":
