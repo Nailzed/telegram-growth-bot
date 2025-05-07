@@ -1,4 +1,3 @@
-
 import os
 import asyncio
 import json
@@ -52,7 +51,7 @@ async def welcome(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"👋 Добро пожаловать, {member.full_name}!"
             f"Пригласи друзей, чтобы попасть в топ 📈"
             f"🚀 Чтобы пройти регистрацию — напишите боту в личные сообщения:"
-            f"👉 https://t.me/{context.bot.username}"
+            "👉 https://t.me/promotelabot"
         )
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
