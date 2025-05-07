@@ -82,11 +82,25 @@ async def funnel_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if state.get("step") == "last_name":
         user_states[user_id]["last_name"] = msg
         user_states[user_id]["step"] = "first_name"
-        await update.message.reply_text("Введите ваше имя:")
+        prompt_id = state.get("prompt_id")
+        if prompt_id:
+            try:
+                await context.bot.delete_message(chat_id=update.effective_chat.id, message_id=prompt_id)
+            except:
+                pass
+        bot_msg = await update.message.reply_text("Введите ваше имя:")
+        user_states[user_id]["prompt_id"] = bot_msg.message_id
     elif state.get("step") == "first_name":
         user_states[user_id]["first_name"] = msg
         user_states[user_id]["step"] = "phone"
-        await update.message.reply_text("Введите ваш номер телефона или Telegram @юзернейм:")
+        prompt_id = state.get("prompt_id")
+        if prompt_id:
+            try:
+                await context.bot.delete_message(chat_id=update.effective_chat.id, message_id=prompt_id)
+            except:
+                pass
+        bot_msg = await update.message.reply_text("Введите ваш номер телефона или Telegram @юзернейм:")
+        user_states[user_id]["prompt_id"] = bot_msg.message_id
     elif state.get("step") == "phone":
         user_states[user_id]["phone"] = msg
         users = load_users()
