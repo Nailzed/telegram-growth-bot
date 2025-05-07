@@ -77,21 +77,21 @@ async def funnel_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     msg = update.message.text.strip()
     state = user_states.get(user_id, {})
-    if state.get('step'):
-        try:
-            await update.message.delete()
-        except Exception as e:
-            print(f'[!] Не удалось удалить сообщение пользователя в воронке: {e}')
-    state = user_states.get(user_id, {})
 
     if state.get("step") == "last_name":
         user_states[user_id]["last_name"] = msg
         user_states[user_id]["step"] = "first_name"
-        await update.message.reply_text("Введите ваше имя:")
+        args = {}
+        if update.message.message_thread_id:
+            args["message_thread_id"] = update.message.message_thread_id
+        await update.message.reply_text("Введите ваше имя:", **args)
     elif state.get("step") == "first_name":
         user_states[user_id]["first_name"] = msg
         user_states[user_id]["step"] = "phone"
-        await update.message.reply_text("Введите ваш номер телефона или Telegram @юзернейм:")
+        args = {}
+        if update.message.message_thread_id:
+            args["message_thread_id"] = update.message.message_thread_id
+        await update.message.reply_text("Введите ваш номер телефона или Telegram @юзернейм:", **args)
     elif state.get("step") == "phone":
         user_states[user_id]["phone"] = msg
         users = load_users()
