@@ -76,39 +76,21 @@ async def role_selected(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def funnel_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     msg = update.message.text.strip()
-    # Удаление предыдущего ответа пользователя
-    last_user_msg_id = user_states.get(user_id, {}).get("last_user_msg_id")
-    if last_user_msg_id:
-        try:
-            await context.bot.delete_message(chat_id=update.effective_chat.id, message_id=last_user_msg_id)
-        except:
-            pass
-    await update.message.delete()
-    user_states[user_id]["last_user_msg_id"] = update.message.message_id
+    try:
+        await update.message.delete()
+    except Exception as e:
+        print(f'Не удалось удалить сообщение пользователя: {e}')
+    user_states.setdefault(user_id, {})['last_user_msg_id'] = update.message.message_id
     state = user_states.get(user_id, {})
 
     if state.get("step") == "last_name":
         user_states[user_id]["last_name"] = msg
         user_states[user_id]["step"] = "first_name"
-        last_bot_msg_id = user_states.get(user_id, {}).get("last_bot_msg_id")
-        if last_bot_msg_id:
-            try:
-                await context.bot.delete_message(chat_id=update.effective_chat.id, message_id=last_bot_msg_id)
-            except:
-                pass
-        bot_msg = await update.message.reply_text("Введите ваше имя:")
-        user_states[user_id]["last_bot_msg_id"] = bot_msg.message_id
+        await update.message.reply_text("Введите ваше имя:")
     elif state.get("step") == "first_name":
         user_states[user_id]["first_name"] = msg
         user_states[user_id]["step"] = "phone"
-        last_bot_msg_id = user_states.get(user_id, {}).get("last_bot_msg_id")
-        if last_bot_msg_id:
-            try:
-                await context.bot.delete_message(chat_id=update.effective_chat.id, message_id=last_bot_msg_id)
-            except:
-                pass
-        bot_msg = await update.message.reply_text("Введите ваш номер телефона или Telegram @юзернейм:")
-        user_states[user_id]["last_bot_msg_id"] = bot_msg.message_id
+        await update.message.reply_text("Введите ваш номер телефона или Telegram @юзернейм:")
     elif state.get("step") == "phone":
         user_states[user_id]["phone"] = msg
         users = load_users()
