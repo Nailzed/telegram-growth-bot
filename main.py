@@ -63,14 +63,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("🧠 Диспетчер", callback_data="role_Диспетчер"),
          InlineKeyboardButton("💰 Инвестор", callback_data="role_Инвестор")]
     ])
-    try:
-        last = user_states.get(update.effective_user.id, {}).get("last_bot_msg_id")
-        if last:
-            await context.bot.delete_message(chat_id=update.effective_chat.id, message_id=last)
-    except Exception as e:
-        print(f"[!] Не удалось удалить прошлое сообщение бота: {e}")
-    sent = await update.message.reply_text("Пожалуйста, выбери кто ты:", reply_markup=keyboard)
-    user_states.setdefault(update.effective_user.id, {})["last_bot_msg_id"] = sent.message_id
+    await update.message.reply_text("Пожалуйста, выбери кто ты:", reply_markup=keyboard)
 
 async def role_selected(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
