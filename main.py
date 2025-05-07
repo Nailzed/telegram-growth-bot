@@ -76,10 +76,17 @@ async def role_selected(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def funnel_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     msg = update.message.text.strip()
+    # Удаляем предыдущее сообщение пользователя
+    last_user = user_states.get(user_id, {}).get('last_user_msg_id')
+    if last_user:
+        try:
+            await context.bot.delete_message(chat_id=update.effective_chat.id, message_id=last_user)
+        except Exception as e:
+            print(f'[!] Ошибка удаления user-сообщения: {e}')
     try:
         await update.message.delete()
     except Exception as e:
-        print(f'Не удалось удалить сообщение пользователя: {e}')
+        print(f'[!] Ошибка удаления текущего user-сообщения: {e}')
     user_states.setdefault(user_id, {})['last_user_msg_id'] = update.message.message_id
     state = user_states.get(user_id, {})
 
