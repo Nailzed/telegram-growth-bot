@@ -77,6 +77,12 @@ async def funnel_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     msg = update.message.text.strip()
     state = user_states.get(user_id, {})
+    if state.get("step"):
+        try:
+            await update.message.delete()
+        except Exception as e:
+            print(f"[!] Не удалось удалить сообщение пользователя в воронке: {e}")
+    state = user_states.get(user_id, {})
 
     if state.get("step") == "last_name":
         user_states[user_id]["last_name"] = msg
