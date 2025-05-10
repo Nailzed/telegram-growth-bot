@@ -54,23 +54,30 @@ async def welcome(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.chat.type != "private":
         return
-    user_id = str(update.effective_user.id)
-    link = f"https://t.me/promotelabot?start={user_id}"
-    await update.message.reply_text(f"🤝 Вот твоя реферальная ссылка: {link}")
-
-    role_keyboard = InlineKeyboardMarkup([
+    user_id = update.effective_user.id
+    user_states[user_id] = {}
+    keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton("👶 Новичок", callback_data="role_Новичок"),
          InlineKeyboardButton("🚛 Овнер", callback_data="role_Овнер")],
         [InlineKeyboardButton("🧠 Диспетчер", callback_data="role_Диспетчер"),
-         InlineKeyboardButton("💰 Инвестор", callback_data="role_Инвестор")]
+         InlineKeyboardButton("💰 Инвестор", callback_data="role_Инвестор")],
+        [InlineKeyboardButton("Я драйвер", callback_data="role_Я драйвер"),
+         InlineKeyboardButton("🔍 Консультация", callback_data="role_Консультация")]
     ])
-    await update.message.reply_text("Пожалуйста, выбери кто ты:", reply_markup=role_keyboard)
+    await update.message.reply_text("Пожалуйста, выбери кто ты:", reply_markup=keyboard)
+
+async def role_selected(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    role = query.data.split("_", 1)[1]
+    user_id = query.from_user.id
+    user_states[user_id] = {"role": role}
 
     service_keyboard = InlineKeyboardMarkup([
-        [InlineKeyboardButton("Я драйвер", callback_data="service_Я драйвер")],
         [InlineKeyboardButton("хочу взять трейлер в аренду", callback_data="service_трейлер")],
         [InlineKeyboardButton("нужна открыть компанию MC/DOT", callback_data="service_MC")],
         [InlineKeyboardButton("купить готовую компанию с рекордом и MC/DOT", callback_data="service_готовая компания")],
@@ -86,7 +93,52 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("нужен адвокат/юрист", callback_data="service_юрист")],
         [InlineKeyboardButton("ищу драйвера", callback_data="service_ищу драйвера")]
     ])
-    await update.message.reply_text("Что вас интересует?", reply_markup=service_keyboard)
+    await query.message.reply_text("Что вас интересует?", reply_markup=service_keyboard)
+
+
+async def role_selected(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    role = query.data.split("_", 1)[1]
+    user_id = query.from_user.id
+    user_states[user_id] = {"role": role}
+    
+    service_keyboard = InlineKeyboardMarkup([
+        [InlineKeyboardButton("Я драйвер", callback_data="service_Я драйвер")],
+        [InlineKeyboardButton("хочу взять трейлер в аренду", callback_data="service_трейлер")],
+        [InlineKeyboardButton("нужна открыть компанию MC/DOT", callback_data="service_MC")],
+        [InlineKeyboardButton("купить готовую компанию с рекордом и MC/DOT", callback_data="service_готовая компания")],
+        [InlineKeyboardButton("нужна консультация - eld", callback_data="service_eld")],
+        [InlineKeyboardButton("нужна консультация - factoring", callback_data="service_factoring")],
+        [InlineKeyboardButton("нужна консультация - accounting", callback_data="service_accounting")],
+        [InlineKeyboardButton("нужна консультация - insurance", callback_data="service_insurance")],
+        [InlineKeyboardButton("нужна консультация - registration", callback_data="service_registration")],
+        [InlineKeyboardButton("нужна консультация - safety", callback_data="service_safety")],
+        [InlineKeyboardButton("нужна консультация - compliance", callback_data="service_compliance")],
+        [InlineKeyboardButton("нужна консультация - finance", callback_data="service_finance")],
+        [InlineKeyboardButton("подбор трака/трейлера", callback_data="service_подбор")],
+        [InlineKeyboardButton("нужен адвокат/юрист", callback_data="service_юрист")],
+        [InlineKeyboardButton("ищу драйвера", callback_data="service_ищу драйвера")],
+        [InlineKeyboardButton("🔍 Консультация", callback_data="service_консультация")]
+    ])
+    await query.message.reply_text("Что вас интересует?", reply_markup=service_keyboard)
+
+async def service_selected(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    service = query.data.split("_", 1)[1]
+    user_id = query.from_user.id
+    user_data = user_states.get(user_id, {})
+    user_data["service"] = service
+    user_states[user_id] = user_data
+
+    msg_admin = (
+        f"📥 Новый запрос от @{query.from_user.username or 'без username'}:"
+        f"Роль: {user_data.get('role', 'не выбрана')}"
+        f"Услуга: {service}"
+    )
+    await context.bot.send_message(chat_id=ADMIN_ID, text=msg_admin)
+    await query.message.reply_text("Спасибо! Ваш запрос отправлен, с вами скоро свяжутся.")
 
 
 async def role_selected(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -179,5 +231,6 @@ if __name__ == "__main__":
     app.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, welcome))
     app.add_handler(MessageHandler(filters.TEXT & filters.Entity("url"), spam_filter))
     app.add_handler(CallbackQueryHandler(role_selected, pattern="^role_"))
+    app.add_handler(CallbackQueryHandler(service_selected, pattern="^service_"))
     app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), funnel_handler))
     app.run_polling()
