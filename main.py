@@ -54,7 +54,47 @@ async def welcome(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # === modified start ===
 
+# --- PATCHED START ---
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    args = context.args
+
+    # Если переход по ссылке с ролью — сразу запускаем воронку
+    if args and args[0].startswith("role_"):
+        role = args[0].split("_", 1)[1]
+        user_states[user_id] = {"role": role, "step": "last_name"}
+        await update.message.reply_text("Введите вашу фамилию:")
+        return
+
+    # Если это личка — покажем кнопки выбора роли
+    if update.message.chat.type == "private":
+        keyboard = InlineKeyboardMarkup([
+            [
+                InlineKeyboardButton("👶 Новичок", callback_data="role_Новичок"),
+                InlineKeyboardButton("🚛 Овнер", callback_data="role_Овнер")
+            ],
+            [
+                InlineKeyboardButton("🧠 Диспетчер", callback_data="role_Диспетчер"),
+                InlineKeyboardButton("💰 Инвестор", callback_data="role_Инвестор")
+            ]
+        ])
+        await update.message.reply_text("Пожалуйста, выбери кто ты:", reply_markup=keyboard)
+    else:
+        # В чате — только кнопка с ссылкой
+        bot_username = context.bot.username
+        link = f"https://t.me/{bot_username}"
+        keyboard = InlineKeyboardMarkup.from_button(
+            InlineKeyboardButton("Зарегистрироваться", url=link)
+        )
+        await update.message.reply_text(
+            "Чтобы пройти регистрацию, нажмите кнопку ниже и перейдите в личные сообщения с ботом:",
+            reply_markup=keyboard
+        )
+
+# --- END PATCHED ---
+
+async def broken_backup(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     args = context.args
     if args and args[0].startswith("role_"):
