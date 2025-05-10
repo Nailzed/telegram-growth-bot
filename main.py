@@ -66,17 +66,21 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
          InlineKeyboardButton("🚛 Овнер", callback_data="role_Овнер")],
         [InlineKeyboardButton("🧠 Диспетчер", callback_data="role_Диспетчер"),
          InlineKeyboardButton("💰 Инвестор", callback_data="role_Инвестор")]
+        [InlineKeyboardButton("хочу взять трейлер в аренду", callback_data="service_хочу взять трейлер в аренду")],
+        InlineKeyboardButton("нужна открыть компанию MC/DOT", callback_data="service_нужна открыть компанию MC/DOT"), 
+        [InlineKeyboardButton("купить готовую компанию с рекордом и MC/DOT", callback_data="service_купить готовую компанию с рекордом и MC/DOT")],
+        InlineKeyboardButton("нужна консультация - eld", callback_data="service_нужна консультация - eld"), 
+        [InlineKeyboardButton("нужна консультация - factoring", callback_data="service_нужна консультация - factoring")],
+        InlineKeyboardButton("нужна консультация - accounting", callback_data="service_нужна консультация - accounting"), 
+        [InlineKeyboardButton("нужна консультация - insurance", callback_data="service_нужна консультация - insurance")],
+        InlineKeyboardButton("нужна консультация - truck/trailer registration", callback_data="service_нужна консультация - truck/trailer registration"), 
+        [InlineKeyboardButton("нужна консультация - safety", callback_data="service_нужна консультация - safety")],
+        InlineKeyboardButton("нужна консультация - compliance", callback_data="service_нужна консультация - compliance"), 
+        [InlineKeyboardButton("нужна консультация - finance", callback_data="service_нужна консультация - finance")],
+        InlineKeyboardButton("подбор трака/трейлера", callback_data="service_подбор трака/трейлера"), 
+        [InlineKeyboardButton("нужен адвокат/юрист", callback_data="service_нужен адвокат/юрист")]
     ])
     await update.message.reply_text("Пожалуйста, выбери кто ты:", reply_markup=keyboard)
-    await update.message.reply_text("Выбери, что тебе нужно:", reply_markup=InlineKeyboardMarkup([
-        [InlineKeyboardButton("Я драйвер", callback_data="service_Я драйвер"), InlineKeyboardButton("хочу взять трейлер в аренду", callback_data="service_хочу взять трейлер в аренду")],
-        [InlineKeyboardButton("нужна открыть компанию MC/DOT", callback_data="service_нужна открыть компанию MC/DOT"), InlineKeyboardButton("купить готовую компанию с рекордом и MC/DOT", callback_data="service_купить готовую компанию с рекордом и MC/DOT")],
-        [InlineKeyboardButton("нужна консультация - eld", callback_data="service_нужна консультация - eld"), InlineKeyboardButton("нужна консультация - factoring", callback_data="service_нужна консультация - factoring")],
-        [InlineKeyboardButton("нужна консультация - accounting", callback_data="service_нужна консультация - accounting"), InlineKeyboardButton("нужна консультация - insurance", callback_data="service_нужна консультация - insurance")],
-        [InlineKeyboardButton("нужна консультация - truck/trailer registration", callback_data="service_нужна консультация - truck/trailer registration"), InlineKeyboardButton("нужна консультация - safety", callback_data="service_нужна консультация - safety")],
-        [InlineKeyboardButton("нужна консультация - compliance", callback_data="service_нужна консультация - compliance"), InlineKeyboardButton("нужна консультация - finance", callback_data="service_нужна консультация - finance")],
-        [InlineKeyboardButton("подбор трака/трейлера", callback_data="service_подбор трака/трейлера"), InlineKeyboardButton("нужен адвокат/юрист", callback_data="service_нужен адвокат/юрист")]
-    ]))
 
 async def role_selected(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
