@@ -133,8 +133,15 @@ async def broken_backup(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # === replaced callback ===
 
 
+
 async def role_selected(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
+    await query.answer()
+    role = query.data.split("_", 1)[1]
+    user_id = query.from_user.id
+    user_states[user_id] = {"role": role, "step": "last_name"}
+    await query.message.reply_text("Введите вашу фамилию:")
+
     await query.answer()
     role = query.data.split("_", 1)[1]
     user_id = query.from_user.id
