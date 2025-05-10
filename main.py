@@ -47,99 +47,15 @@ async def welcome(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 data[ref_by].append(str(member.id))
                 save_data(data)
         await update.message.reply_text(
-            f"👋 Добро пожаловать, {member.full_name}!"
-            f"🚀 Напишите в ЛС, чтобы выбрать путь и оставить контакт:"
-            f"https://t.me/promotelabot"
+            "🚀 Напишите в ЛС, чтобы выбрать путь и оставить контакт:\n"
+            "https://t.me/promotelabot"
         )
-
-
-
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.effective_user.id
-    args = context.args
-
-    # если это не личка — показать ссылку и выйти
+    # respond only in private chat
     if update.message.chat.type != "private":
-        bot_username = context.bot.username
-        link = f"https://t.me/{bot_username}"
-        keyboard = InlineKeyboardMarkup.from_button(
-            InlineKeyboardButton("Зарегистрироваться", url=link)
-        )
-        await update.message.reply_text(
-            "Чтобы пройти регистрацию, перейдите в личные сообщения с ботом:",
-            reply_markup=keyboard
-        )
         return
-
-    # если пользователь уже начал — не повторять
-    if user_id in user_states:
-        return
-
-    # если есть параметр роли — начать анкету
-    if args and args[0].startswith("role_"):
-        role = args[0].split("_", 1)[1]
-        user_states[user_id] = {"role": role, "step": "last_name"}
-        await update.message.reply_text("Введите вашу фамилию:")
-        return
-
-    # личка без параметров — показать выбор ролей
-    keyboard = InlineKeyboardMarkup([
-        [
-            InlineKeyboardButton("👶 Новичок", callback_data="role_Новичок"),
-            InlineKeyboardButton("🚛 Овнер", callback_data="role_Овнер")
-        ],
-        [
-            InlineKeyboardButton("🧠 Диспетчер", callback_data="role_Диспетчер"),
-            InlineKeyboardButton("💰 Инвестор", callback_data="role_Инвестор")
-        ]
-    ])
-    await update.message.reply_text("Пожалуйста, выбери кто ты:", reply_markup=keyboard)
-
-
-    # если есть параметр роли — начать анкету
-    if args and args[0].startswith("role_"):
-        role = args[0].split("_", 1)[1]
-        user_states[user_id] = {"role": role, "step": "last_name"}
-        await update.message.reply_text("Введите вашу фамилию:")
-        return
-
-    # личка без параметров — показать выбор ролей
-    keyboard = InlineKeyboardMarkup([
-        [
-            InlineKeyboardButton("👶 Новичок", callback_data="role_Новичок"),
-            InlineKeyboardButton("🚛 Овнер", callback_data="role_Овнер")
-        ],
-        [
-            InlineKeyboardButton("🧠 Диспетчер", callback_data="role_Диспетчер"),
-            InlineKeyboardButton("💰 Инвестор", callback_data="role_Инвестор")
-        ]
-    ])
-    await update.message.reply_text("Пожалуйста, выбери кто ты:", reply_markup=keyboard)
-
-
-    if update.message.chat.type == "private":
-        keyboard = InlineKeyboardMarkup([
-            [
-                InlineKeyboardButton("👶 Новичок", callback_data="role_Новичок"),
-                InlineKeyboardButton("🚛 Овнер", callback_data="role_Овнер")
-            ],
-            [
-                InlineKeyboardButton("🧠 Диспетчер", callback_data="role_Диспетчер"),
-                InlineKeyboardButton("💰 Инвестор", callback_data="role_Инвестор")
-            ]
-        ])
-            else:
-        bot_username = context.bot.username
-        link = f"https://t.me/{bot_username}"
-        keyboard = InlineKeyboardMarkup.from_button(
-            InlineKeyboardButton("Зарегистрироваться", url=link)
-        )
-        await update.message.reply_text(
-            "Чтобы пройти регистрацию, перейдите в личные сообщения с ботом:",
-            reply_markup=keyboard
-        )
-
+    user_id = str(update.effective_user.id)
     link = f"https://t.me/promotelabot?start={user_id}"
     await update.message.reply_text(f"🤝 Вот твоя реферальная ссылка: {link}")
 
@@ -149,16 +65,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("🧠 Диспетчер", callback_data="role_Диспетчер"),
          InlineKeyboardButton("💰 Инвестор", callback_data="role_Инвестор")]
     ])
-    
+    await update.message.reply_text("Пожалуйста, выбери кто ты:", reply_markup=keyboard)
 
 async def role_selected(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
-    await query.answer()
-    role = query.data.split("_", 1)[1]
-    user_id = query.from_user.id
-    user_states[user_id] = {"role": role, "step": "last_name"}
-    await query.message.reply_text("Введите вашу фамилию:")
-
     await query.answer()
     role = query.data.split("_", 1)[1]
     user_id = query.from_user.id
