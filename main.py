@@ -47,9 +47,11 @@ async def welcome(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 data[ref_by].append(str(member.id))
                 save_data(data)
         await update.message.reply_text(
-            "🚀 Напишите в ЛС, чтобы выбрать путь и оставить контакт:\n"
-            "https://t.me/promotelabot"
-        )
+        "Чтобы продолжить, нажмите кнопку ниже и напишите боту в личку:",
+        reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton("📝 Зарегистрироваться", url="https://t.me/promotelabot?start=group")]
+        ])
+    )
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # respond only in private chat
