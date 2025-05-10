@@ -53,8 +53,44 @@ async def welcome(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
 
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
+    args = context.args
+
+    # если это не личка — показать ссылку и выйти
+    if update.message.chat.type != "private":
+        bot_username = context.bot.username
+        link = f"https://t.me/{bot_username}"
+        keyboard = InlineKeyboardMarkup.from_button(
+            InlineKeyboardButton("Зарегистрироваться", url=link)
+        )
+        await update.message.reply_text(
+            "Чтобы пройти регистрацию, перейдите в личные сообщения с ботом:",
+            reply_markup=keyboard
+        )
+        return
+
+    # если есть параметр роли — начать анкету
+    if args and args[0].startswith("role_"):
+        role = args[0].split("_", 1)[1]
+        user_states[user_id] = {"role": role, "step": "last_name"}
+        await update.message.reply_text("Введите вашу фамилию:")
+        return
+
+    # личка без параметров — показать выбор ролей
+    keyboard = InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton("👶 Новичок", callback_data="role_Новичок"),
+            InlineKeyboardButton("🚛 Овнер", callback_data="role_Овнер")
+        ],
+        [
+            InlineKeyboardButton("🧠 Диспетчер", callback_data="role_Диспетчер"),
+            InlineKeyboardButton("💰 Инвестор", callback_data="role_Инвестор")
+        ]
+    ])
+    await update.message.reply_text("Пожалуйста, выбери кто ты:", reply_markup=keyboard)
+
     args = context.args
 
     if args and args[0].startswith("role_"):
