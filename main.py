@@ -52,22 +52,17 @@ async def welcome(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"https://t.me/promotelabot"
         )
 
-# === modified start ===
-
-# --- PATCHED START ---
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     args = context.args
 
-    # Если переход по ссылке с ролью — сразу запускаем воронку
     if args and args[0].startswith("role_"):
         role = args[0].split("_", 1)[1]
         user_states[user_id] = {"role": role, "step": "last_name"}
         await update.message.reply_text("Введите вашу фамилию:")
         return
 
-    # Если это личка — покажем кнопки выбора роли
     if update.message.chat.type == "private":
         keyboard = InlineKeyboardMarkup([
             [
@@ -81,44 +76,16 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ])
         await update.message.reply_text("Пожалуйста, выбери кто ты:", reply_markup=keyboard)
     else:
-        # В чате — только кнопка с ссылкой
         bot_username = context.bot.username
         link = f"https://t.me/{bot_username}"
         keyboard = InlineKeyboardMarkup.from_button(
             InlineKeyboardButton("Зарегистрироваться", url=link)
         )
         await update.message.reply_text(
-            "Чтобы пройти регистрацию, нажмите кнопку ниже и перейдите в личные сообщения с ботом:",
+            "Чтобы пройти регистрацию, перейдите в личные сообщения с ботом:",
             reply_markup=keyboard
         )
 
-# --- END PATCHED ---
-
-async def broken_backup(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.effective_user.id
-    args = context.args
-    if args and args[0].startswith("role_"):
-        role = args[0].split("_", 1)[1]
-        user_states[user_id] = {"role": role, "step": "last_name"}
-        await update.message.reply_text("Введите вашу фамилию:")
-        return
-    # обычный старт
-    keyboard = [
-        [
-            InlineKeyboardButton("👶 Новичок", callback_data="role_Новичок"),
-            InlineKeyboardButton("🚛 Овнер", callback_data="role_Овнер")
-        ],
-        [
-            InlineKeyboardButton("🧠 Диспетчер", callback_data="role_Диспетчер"),
-            InlineKeyboardButton("💰 Инвестор", callback_data="role_Инвестор")
-        ]
-    ]
-    await update.message.reply_text("Привет! Пожалуйста, выбери кто ты:", reply_markup=InlineKeyboardMarkup(keyboard))
-
-# === end modified start ===
-
-async def broken_backup(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = str(update.effective_user.id)
     link = f"https://t.me/promotelabot?start={user_id}"
     await update.message.reply_text(f"🤝 Вот твоя реферальная ссылка: {link}")
 
@@ -130,9 +97,6 @@ async def broken_backup(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ])
     await update.message.reply_text("Пожалуйста, выбери кто ты:", reply_markup=keyboard)
 
-# === replaced callback ===
-
-
 
 async def role_selected(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -142,28 +106,6 @@ async def role_selected(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_states[user_id] = {"role": role, "step": "last_name"}
     await query.message.reply_text("Введите вашу фамилию:")
 
-    await query.answer()
-    role = query.data.split("_", 1)[1]
-    user_id = query.from_user.id
-    user_states[user_id] = {"role": role, "step": "last_name"}
-    await query.message.reply_text("Введите вашу фамилию:")
-
-    await query.answer()
-    role = query.data.split("_", 1)[1]
-    bot_username = context.bot.username
-    start_link = f"https://t.me/{bot_username}?start=role_{role}"
-    keyboard = InlineKeyboardMarkup.from_button(
-        InlineKeyboardButton("Перейти к анкете в личные сообщения", url=start_link)
-    )
-    await query.message.reply_text(
-        f"Вы выбрали роль: {role}. Нажмите кнопку ниже, чтобы продолжить в личке:",
-        reply_markup=keyboard
-    )
-
-# === end replaced callback ===
-
-async def broken_callback_backup(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
     await query.answer()
     role = query.data.split("_", 1)[1]
     user_id = query.from_user.id
