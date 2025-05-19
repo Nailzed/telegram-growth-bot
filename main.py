@@ -9,8 +9,7 @@ from telegram.ext import (
 
 TOKEN = os.getenv("BOT_TOKEN")
 GROUP_ID = int(os.getenv("GROUP_ID"))
-ADMIN_ID = 124522501
-ADMIN_ID = 7510196452
+ADMIN_ID = [124522501, 7510196452]
 USER_DB = "users.json"
 REFERRAL_FILE = "referrals.json"
 PROMO_INTERVAL = 21600
