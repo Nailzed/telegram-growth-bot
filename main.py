@@ -35,11 +35,16 @@ def save_users(data):
     with open(USER_DB, "w") as f:
         json.dump(data, f)
 
+async def notify_admins(context, text):
+    for admin_id in ADMIN_ID:
+        try:
+            await context.bot.send_message(chat_id=admin_id, text=text)
+        except Exception as e:
+            print(f"[!] Error sending to admin {admin_id}: {e}")
+
 async def welcome(update: Update, context: ContextTypes.DEFAULT_TYPE):
     data = load_data()
-    ref_by = None
-    if context.args:
-        ref_by = context.args[0]
+    ref_by = context.args[0] if context.args else None
     for member in update.message.new_chat_members:
         if ref_by and ref_by != str(member.id):
             data.setdefault(ref_by, [])
@@ -47,13 +52,11 @@ async def welcome(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 data[ref_by].append(str(member.id))
                 save_data(data)
         await update.message.reply_text(
-        "Чтобы продолжить, нажмите кнопку ниже и напишите боту в личку:",
-        reply_markup=InlineKeyboardMarkup([
-            [InlineKeyboardButton("📝 Зарегистрироваться", url="https://t.me/promotelabot?start=group")]
-        ])
-    )
-
-
+            "Чтобы продолжить, нажмите кнопку ниже и напишите боту в личку:",
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("📝 Зарегистрироваться", url="https://t.me/promotelabot?start=group")]
+            ])
+        )
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.chat.type != "private":
@@ -70,7 +73,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ])
     await update.message.reply_text("Пожалуйста, выбери кто ты:", reply_markup=keyboard)
 
-
 async def role_selected(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -78,36 +80,6 @@ async def role_selected(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = query.from_user.id
     user_states[user_id] = {"role": role}
 
-    service_keyboard = InlineKeyboardMarkup([
-        [InlineKeyboardButton("хочу взять трейлер в аренду", callback_data="service_трейлер")],
-        [InlineKeyboardButton("нужна открыть компанию MC/DOT", callback_data="service_MC")],
-        [InlineKeyboardButton("купить готовую компанию с рекордом и MC/DOT", callback_data="service_готовая компания")],
-        [InlineKeyboardButton("нужна консультация - eld", callback_data="service_eld")],
-        [InlineKeyboardButton("нужна консультация - factoring", callback_data="service_factoring")],
-        [InlineKeyboardButton("нужна консультация - accounting", callback_data="service_accounting")],
-        [InlineKeyboardButton("нужна консультация - insurance", callback_data="service_insurance")],
-        [InlineKeyboardButton("нужна консультация - registration", callback_data="service_registration")],
-        [InlineKeyboardButton("нужна консультация - safety", callback_data="service_safety")],
-        [InlineKeyboardButton("нужна консультация - compliance", callback_data="service_compliance")],
-        [InlineKeyboardButton("нужна консультация - finance", callback_data="service_finance")],
-        [InlineKeyboardButton("подбор трака/трейлера", callback_data="service_подбор")],
-        [InlineKeyboardButton("нужен адвокат/юрист", callback_data="service_юрист")],
-        [InlineKeyboardButton("ищу драйвера", callback_data="service_ищу драйвера")]
-    ])
-    await context.bot.send_message(
-        chat_id=user_id,
-        text="Что вас интересует?",
-        reply_markup=service_keyboard
-    )
-
-
-async def role_selected(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    await query.answer()
-    role = query.data.split("_", 1)[1]
-    user_id = query.from_user.id
-    user_states[user_id] = {"role": role}
-    
     service_keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton("Я драйвер", callback_data="service_Я драйвер")],
         [InlineKeyboardButton("хочу взять трейлер в аренду", callback_data="service_трейлер")],
@@ -142,40 +114,8 @@ async def service_selected(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"Роль: {user_data.get('role', 'не выбрана')}"
         f"Услуга: {service}"
     )
-    await context.bot.send_message(chat_id=ADMIN_ID, text=msg_admin)
+    await notify_admins(context, msg_admin)
     await query.message.reply_text("Спасибо! Ваш запрос отправлен, с вами скоро свяжутся.")
-
-
-
-async def role_selected(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    await query.answer()
-    role = query.data.split("_", 1)[1]
-    user_id = query.from_user.id
-    user_states[user_id] = {"role": role}
-
-    service_keyboard = InlineKeyboardMarkup([
-        [InlineKeyboardButton("хочу взять трейлер в аренду", callback_data="service_трейлер")],
-        [InlineKeyboardButton("нужна открыть компанию MC/DOT", callback_data="service_MC")],
-        [InlineKeyboardButton("купить готовую компанию с рекордом и MC/DOT", callback_data="service_готовая компания")],
-        [InlineKeyboardButton("нужна консультация - eld", callback_data="service_eld")],
-        [InlineKeyboardButton("нужна консультация - factoring", callback_data="service_factoring")],
-        [InlineKeyboardButton("нужна консультация - accounting", callback_data="service_accounting")],
-        [InlineKeyboardButton("нужна консультация - insurance", callback_data="service_insurance")],
-        [InlineKeyboardButton("нужна консультация - registration", callback_data="service_registration")],
-        [InlineKeyboardButton("нужна консультация - safety", callback_data="service_safety")],
-        [InlineKeyboardButton("нужна консультация - compliance", callback_data="service_compliance")],
-        [InlineKeyboardButton("нужна консультация - finance", callback_data="service_finance")],
-        [InlineKeyboardButton("подбор трака/трейлера", callback_data="service_подбор")],
-        [InlineKeyboardButton("нужен адвокат/юрист", callback_data="service_юрист")],
-        [InlineKeyboardButton("ищу драйвера", callback_data="service_ищу драйвера")]
-    ])
-    await context.bot.send_message(
-        chat_id=user_id,
-        text="Что вас интересует?",
-        reply_markup=service_keyboard
-    )
-
 
 async def funnel_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
@@ -199,16 +139,12 @@ async def funnel_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         data = user_states[user_id]
         msg_admin = (
             f"📥 Новый контакт с воронки:"
-
             f"Роль: {data['role']}"
-
             f"Фамилия: {data['last_name']}"
-
             f"Имя: {data['first_name']}"
-
             f"Телефон/контакт: {data['phone']}"
         )
-        await context.bot.send_message(chat_id=ADMIN_ID, text=msg_admin)
+        await notify_admins(context, msg_admin)
         await update.message.reply_text("Спасибо! Ваша информация отправлена.")
         del user_states[user_id]
 
@@ -225,7 +161,7 @@ async def topreferrers(update: Update, context: ContextTypes.DEFAULT_TYPE):
     for uid, refs in top:
         try:
             user = await context.bot.get_chat(uid)
-            msg += f"- {user.first_name}: {len(refs)} чел."
+            msg += f"\n- {user.first_name}: {len(refs)} чел."
         except:
             pass
     await update.message.reply_text(msg)
